@@ -9,12 +9,12 @@
         send (fn [payloadType payload callback]
                (if (= @state disconnected)
                  (callback disconnected)
-                 (let [clientMsgId (swap! id (fn [s] (str (inc (int s)))))
-                       message (.encode codec payloadType payload clientMsgId)]
-                   (swap! callbacks assoc clientMsgId callback)
+                 (let [correlationIdentifier (swap! id (fn [s] (str (inc (int s)))))
+                       message (.encode codec payloadType payload correlationIdentifier)]
+                   (swap! callbacks assoc correlationIdentifier callback)
                    (.send adapter message))))
-        recive (fn [payloadType payload clientMsgId]
-                 (let [callback (get @callbacks clientMsgId)]
+        recive (fn [payloadType payload correlationIdentifier]
+                 (let [callback (get @callbacks correlationIdentifier)]
                    (when-not (nil? callback)
                      (callback payload))))]
     (.onOpen adapter #(reset! state connected))
